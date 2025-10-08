@@ -1,0 +1,34 @@
+name: Newman API tests
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  run-newman:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Run Newman test suite
+        run: npm test
+
+      - name: Upload Newman CLI report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: newman-cli-report
+          path: reports/cli-report.json

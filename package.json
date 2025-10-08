@@ -1,0 +1,16 @@
+{
+  "name": "swagger-petstore-postman",
+  "version": "1.0.0",
+  "description": "Postman collection and Newman setup for the Swagger Petstore API",
+  "scripts": {
+    "test": "newman run collections/swagger-petstore.postman_collection.json -e environments/swagger-petstore.postman_environment.json --reporters cli --reporter-cli-export reports/cli-report.json",
+    "test:report": "newman run collections/swagger-petstore.postman_collection.json -e environments/swagger-petstore.postman_environment.json --reporters cli,htmlextra --reporter-cli-export reports/cli-report.json --reporter-htmlextra-export reports/swagger-petstore.html"
+  },
+  "devDependencies": {
+    "newman": "^5.4.0",
+    "newman-reporter-htmlextra": "^1.23.0"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}
