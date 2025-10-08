@@ -1,0 +1,376 @@
+{
+  "info": {
+    "name": "Swagger Petstore",
+    "description": "Automated regression checks for the Swagger Petstore reference API.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "event": [
+    {
+      "listen": "prerequest",
+      "script": {
+        "type": "text/javascript",
+        "exec": [
+          "const isoTimestamp = new Date().toISOString();",
+          "pm.environment.set('isoTimestamp', isoTimestamp);"
+        ]
+      }
+    }
+  ],
+  "item": [
+    {
+      "name": "Pets",
+      "description": "Requests that manage pets in the store.",
+      "item": [
+        {
+          "name": "Create pet",
+          "description": "Creates a new pet using a random identifier and stores it in the environment for later requests.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const id = Math.floor(Math.random() * 1000000);",
+                  "pm.environment.set('petId', id);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('returns the newly created pet identifier', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.id).to.eql(Number(pm.environment.get('petId')));",
+                  "});",
+                  "pm.test('persists the requested status and name', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.status).to.eql('available');",
+                  "    pm.expect(responseJson.name).to.eql('Postman Demo Pet');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"name\": \"Postman Demo Pet\",\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Dogs\"\n  },\n  \"photoUrls\": [\n    \"https://example.com/pets/postman-demo\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"automation\"\n    }\n  ],\n  \"status\": \"available\"\n}"
+            },
+            "url": "{{baseUrl}}/pet"
+          },
+          "response": []
+        },
+        {
+          "name": "Get pet by id",
+          "description": "Retrieves the pet created earlier and validates core fields.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('response contains the requested pet', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.id).to.eql(Number(pm.environment.get('petId')));",
+                  "    pm.expect(responseJson.name).to.eql('Postman Demo Pet');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/pet/{{petId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Update pet status",
+          "description": "Updates the pet to the 'pending' status and confirms the change is reflected in the API response.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('updates the status to pending', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.status).to.eql('pending');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "PUT",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{petId}},\n  \"name\": \"Postman Demo Pet\",\n  \"category\": {\n    \"id\": 1,\n    \"name\": \"Dogs\"\n  },\n  \"photoUrls\": [\n    \"https://example.com/pets/postman-demo\"\n  ],\n  \"tags\": [\n    {\n      \"id\": 1,\n      \"name\": \"automation\"\n    }\n  ],\n  \"status\": \"pending\"\n}"
+            },
+            "url": "{{baseUrl}}/pet"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Store",
+      "description": "Operations that manage store orders.",
+      "item": [
+        {
+          "name": "Place order",
+          "description": "Places a new order for the previously created pet and stores the generated order identifier.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const orderId = Math.floor(Math.random() * 1000000);",
+                  "pm.environment.set('orderId', orderId);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('creates an order linked to the pet', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.id).to.eql(Number(pm.environment.get('orderId')));",
+                  "    pm.expect(responseJson.petId).to.eql(Number(pm.environment.get('petId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": {{orderId}},\n  \"petId\": {{petId}},\n  \"quantity\": 1,\n  \"shipDate\": \"{{isoTimestamp}}\",\n  \"status\": \"placed\",\n  \"complete\": true\n}"
+            },
+            "url": "{{baseUrl}}/store/order"
+          },
+          "response": []
+        },
+        {
+          "name": "Get order by id",
+          "description": "Retrieves the order and validates the order and pet identifiers.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('contains the requested order', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.id).to.eql(Number(pm.environment.get('orderId')));",
+                  "    pm.expect(responseJson.petId).to.eql(Number(pm.environment.get('petId')));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/store/order/{{orderId}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Delete order",
+          "description": "Deletes the order to keep the test environment clean.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200 or 204', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/store/order/{{orderId}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Users",
+      "description": "Operations for user management scenarios.",
+      "item": [
+        {
+          "name": "Create user",
+          "description": "Creates a unique user and stores the username in the environment.",
+          "event": [
+            {
+              "listen": "prerequest",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "const uniqueUsername = `postman-user-${Date.now()}`;",
+                  "pm.environment.set('username', uniqueUsername);"
+                ]
+              }
+            },
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('confirms successful user creation', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.eql(pm.environment.get('username'));",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              {
+                "key": "Content-Type",
+                "value": "application/json"
+              }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"id\": 0,\n  \"username\": \"{{username}}\",\n  \"firstName\": \"Postman\",\n  \"lastName\": \"User\",\n  \"email\": \"postman.user@example.com\",\n  \"password\": \"{{userPassword}}\",\n  \"phone\": \"+1 555 0100\",\n  \"userStatus\": 1\n}"
+            },
+            "url": "{{baseUrl}}/user"
+          },
+          "response": []
+        },
+        {
+          "name": "Login user",
+          "description": "Authenticates with the newly created user credentials and checks the login token is returned.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('returns a session token in the message', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.message).to.include('logged in user session');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/user/login?username={{username}}&password={{userPassword}}"
+          },
+          "response": []
+        },
+        {
+          "name": "Get user by username",
+          "description": "Retrieves the created user to verify the persisted data.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200', function () {",
+                  "    pm.response.to.have.status(200);",
+                  "});",
+                  "pm.test('response matches the created user', function () {",
+                  "    const responseJson = pm.response.json();",
+                  "    pm.expect(responseJson.username).to.eql(pm.environment.get('username'));",
+                  "    pm.expect(responseJson.email).to.eql('postman.user@example.com');",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "GET",
+            "url": "{{baseUrl}}/user/{{username}}"
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "Cleanup",
+      "description": "Requests that remove data created during the run.",
+      "item": [
+        {
+          "name": "Delete pet",
+          "description": "Deletes the pet created during the test run to prevent data pollution.",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "type": "text/javascript",
+                "exec": [
+                  "pm.test('returns HTTP 200, 204, or 404', function () {",
+                  "    pm.expect(pm.response.code).to.be.oneOf([200, 204, 404]);",
+                  "});"
+                ]
+              }
+            }
+          ],
+          "request": {
+            "method": "DELETE",
+            "url": "{{baseUrl}}/pet/{{petId}}"
+          },
+          "response": []
+        }
+      ]
+    }
+  ]
+}
